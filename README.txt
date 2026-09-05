@@ -1,2 +1,2 @@
-BOISSONS ANBA – V4
-Lecteur hors connexion. V4 recale les centres des 6 colonnes et des 12 lignes sur chaque photo avant de mesurer les marques.
+BOISSONS ANBA — V6
+Lecture locale hors connexion. Résultats modifiables 0–6 avant validation. Thème brun/or. Détection rendue plus conservatrice pour réduire les faux positifs.
