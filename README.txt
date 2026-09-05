@@ -1,12 +1,5 @@
-BOISSONS ANBA – HORS CONNEXION (PWA)
+BOISSONS ANBA — V3 HORS CONNEXION
 
-Contenu : index.html, manifest.webmanifest, sw.js.
-
-INSTALLATION :
-1. Publier le contenu de ce dossier sur un hébergement HTTPS.
-2. Ouvrir l'adresse dans Safari sur l'iPhone une première fois avec Internet.
-3. Safari > Partager > Sur l'écran d'accueil > Ajouter.
-4. Ouvrir l'icône Boissons ANBA une première fois.
-5. L'application et les commandes enregistrées fonctionnent ensuite localement/hors connexion.
-
-IMPORTANT : le ZIP n'est pas à ouvrir comme application directement sur l'iPhone. Il doit d'abord être publié sur HTTPS pour que le service worker puisse être installé.
+Lecture géométrique recalibrée sur la fiche réelle ANBA : 12 lignes × 6 colonnes.
+Les 4 repères servent au redressement de perspective; les positions des cercles sont ensuite déterminées par la géométrie fixe de la fiche.
+Une ligne vide vaut 0; deux cases marquées sur une même ligne rendent la lecture ambiguë et empêchent la validation.
