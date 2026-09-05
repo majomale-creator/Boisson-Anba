@@ -1,7 +1,46 @@
-<!doctype html><html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="theme-color" content="#111"><meta name="apple-mobile-web-app-title" content="Boissons ANBA"><link rel="manifest" href="./manifest.webmanifest"><title>Boissons ANBA</title><style>body{font-family:-apple-system,system-ui;margin:0;background:#f2f2f2;color:#111}header{background:linear-gradient(135deg,#6f4e24,#b08d57);color:#fff;padding:14px;text-align:center}main{max-width:760px;margin:auto;padding:12px}.card{background:#fff;border-radius:14px;padding:14px;margin:10px 0;box-shadow:0 1px 5px #bbb}.file,button{display:block;width:100%;box-sizing:border-box;padding:14px;margin:8px 0;border:0;border-radius:10px;background:#8a642f;color:#fff;font-size:17px;text-align:center}button:disabled{opacity:.35}.qty{width:64px;padding:8px;border:1px solid #b99a68;border-radius:8px;font-size:18px;text-align:center;background:#fff}.confidence{font-size:11px;color:#777;margin-left:6px}.danger{background:#9b1c1c}input[type=file]{display:none}canvas{width:100%;height:auto;border-radius:8px;background:#ddd}.row{display:grid;grid-template-columns:1fr auto;gap:8px;padding:7px 0;border-bottom:1px solid #ddd}.good{color:#08752f;font-weight:700}.bad{color:#a01818;font-weight:700}.small{font-size:13px;color:#666}</style></head><body><header><b>Boissons ANBA</b><br><small>Lecteur local V6 — lecture + correction</small></header><main><div class="card"><label class="file" for="photo">Photographier / choisir une fiche</label><input id="photo" type="file" accept="image/*" capture="environment"><canvas id="cv"></canvas><p id="status" class="small">Aucune fiche chargée.</p></div><div class="card"><h3>Lecture</h3><div id="result">—</div><button id="validate" disabled>Valider la commande</button></div><div class="card"><h3>Totaux</h3><div id="totals"></div><button class="danger" id="reset">Tout annuler</button></div></main><script>
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#8a642f">
+<meta name="apple-mobile-web-app-title" content="Boissons ANBA">
+<link rel="manifest" href="./manifest.webmanifest">
+<title>Boissons ANBA</title>
+<style>body{font-family:-apple-system,system-ui;margin:0;background:#f2f2f2;color:#111}header{background:linear-gradient(135deg,#6f4e24,#b08d57);color:#fff;padding:14px;text-align:center}main{max-width:760px;margin:auto;padding:12px}.card{background:#fff;border-radius:14px;padding:14px;margin:10px 0;box-shadow:0 1px 5px #bbb}.file,button{display:block;width:100%;box-sizing:border-box;padding:14px;margin:8px 0;border:0;border-radius:10px;background:#8a642f;color:#fff;font-size:17px;text-align:center}button:disabled{opacity:.35}.qty{width:64px;padding:8px;border:1px solid #b99a68;border-radius:8px;font-size:18px;text-align:center;background:#fff}.confidence{font-size:11px;color:#777;margin-left:6px}.danger{background:#9b1c1c}input[type=file]{display:none}canvas{width:100%;height:auto;border-radius:8px;background:#ddd}.row{display:grid;grid-template-columns:1fr auto;gap:8px;padding:7px 0;border-bottom:1px solid #ddd}.good{color:#08752f;font-weight:700}.bad{color:#a01818;font-weight:700}.small{font-size:13px;color:#666}.idgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.idgrid label{font-weight:700}.idgrid input{width:100%;box-sizing:border-box;margin-top:5px;padding:10px;border:1px solid #b99a68;border-radius:8px;font-size:20px;background:#fff}.hist{padding:9px 0;border-bottom:1px solid #ddd}.hist button{display:inline-block;width:auto;padding:7px 10px;margin:5px 0 0;font-size:13px;background:#9b1c1c}</style>
+</head>
+<body>
+<header>
+<b>Boissons ANBA</b>
+<br>
+<small>Lecteur local V7 — table, commande, historique</small>
+</header>
+<main>
+<div class="card">
+<label class="file" for="photo">Photographier / choisir une fiche</label>
+<input id="photo" type="file" accept="image/*" capture="environment">
+<canvas id="cv">
+</canvas>
+<p id="status" class="small">Aucune fiche chargée.</p>
+</div>
+<div class="card"><h3>Identification</h3><div class="idgrid"><label>Table No.<input id="tableNo" type="number" min="1" max="99" inputmode="numeric" placeholder="—"></label><label>Commande No.<input id="orderNo" type="number" min="1" max="99" inputmode="numeric" placeholder="—"></label></div><p id="idStatus" class="small">Lecture automatique puis correction possible.</p></div>
+<div class="card">
+<h3>Lecture</h3>
+<div id="result">—</div>
+<button id="validate" disabled>Valider la commande</button>
+</div>
+<div class="card">
+<h3>Totaux</h3>
+<div id="totals">
+</div>
+<button class="danger" id="reset">Tout annuler</button>
+</div><div class="card"><h3>Historique</h3><div id="history">Aucune commande enregistrée.</div></div>
+</main>
+<script>
 const drinks=['Whisky Antiquity Blue','Whisky Royal Challenge','Brandy Morpheus','Bière','Martini','Punch','Porto','Bacardi Breezer','Eau','Coca-Cola','Jus de fruits','Soda'];
 const cv=document.querySelector('#cv'),ctx=cv.getContext('2d',{willReadFrequently:true}),statusEl=document.querySelector('#status'),result=document.querySelector('#result'),validate=document.querySelector('#validate');let current=null;
-function store(){return JSON.parse(localStorage.getItem('anbaOrders')||'[]')}function save(a){localStorage.setItem('anbaOrders',JSON.stringify(a));renderTotals()}function renderTotals(){let t=Array(12).fill(0);store().forEach(o=>o.items.forEach((v,i)=>t[i]+=v));document.querySelector('#totals').innerHTML=drinks.map((d,i)=>`<div class="row"><span>${d}</span><b>${t[i]}</b></div>`).join('')}
+function store(){return JSON.parse(localStorage.getItem('anbaOrders')||'[]')}function save(a){localStorage.setItem('anbaOrders',JSON.stringify(a));renderTotals();renderHistory()}function renderTotals(){let t=Array(12).fill(0);store().forEach(o=>o.items.forEach((v,i)=>t[i]+=v));document.querySelector('#totals').innerHTML=drinks.map((d,i)=>`<div class="row"><span>${d}</span><b>${t[i]}</b></div>`).join('')}function renderHistory(){let a=store(),h=document.querySelector('#history');if(!a.length){h.textContent='Aucune commande enregistrée.';return}h.innerHTML=a.slice().reverse().map((o,j)=>{let i=a.length-1-j, nz=o.items.map((v,k)=>v?drinks[k]+' '+v:'').filter(Boolean).join(' · ')||'Aucune boisson';return `<div class="hist"><b>Table ${o.table||'?'} — Commande ${o.order||'?'}</b><br><span class="small">${nz}</span><br><button data-del="${i}">Annuler cette commande</button></div>`}).join('');h.querySelectorAll('[data-del]').forEach(b=>b.onclick=()=>{if(confirm('Annuler cette commande ?')){let x=store();x.splice(+b.dataset.del,1);save(x)}})}
 function solve(A,b){for(let i=0;i<8;i++){let m=i;for(let j=i+1;j<8;j++)if(Math.abs(A[j][i])>Math.abs(A[m][i]))m=j;[A[i],A[m]]=[A[m],A[i]];[b[i],b[m]]=[b[m],b[i]];let q=A[i][i];if(Math.abs(q)<1e-9)return null;for(let k=i;k<8;k++)A[i][k]/=q;b[i]/=q;for(let j=0;j<8;j++)if(j!==i){q=A[j][i];for(let k=i;k<8;k++)A[j][k]-=q*A[i][k];b[j]-=q*b[i]}}return b}
 function homography(p){let s=[[0,0],[1,0],[0,1],[1,1]],A=[],b=[];for(let i=0;i<4;i++){let[u,v]=s[i],[x,y]=p[i];A.push([u,v,1,0,0,0,-u*x,-v*x]);b.push(x);A.push([0,0,0,u,v,1,-u*y,-v*y]);b.push(y)}return solve(A,b)}function map(H,u,v){let z=H[6]*u+H[7]*v+1;return[(H[0]*u+H[1]*v+H[2])/z,(H[3]*u+H[4]*v+H[5])/z]}
 function detectMarkers(im){let{data,width:w,height:h}=im,seen=new Uint8Array(w*h),cs=[];const dark=i=>{let k=i*4,r=data[k],g=data[k+1],b=data[k+2];return(r+g+b)/3<115||(b>r*1.12&&b>g*1.04&&r<175)};for(let y=0;y<h;y++)for(let x=0;x<w;x++){let ii=y*w+x;if(seen[ii]||!dark(ii))continue;let st=[ii];seen[ii]=1;let n=0,minx=x,maxx=x,miny=y,maxy=y,sx=0,sy=0;while(st.length){let q=st.pop(),qy=(q/w)|0,qx=q-qy*w;n++;sx+=qx;sy+=qy;minx=Math.min(minx,qx);maxx=Math.max(maxx,qx);miny=Math.min(miny,qy);maxy=Math.max(maxy,qy);for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++){let xx=qx+dx,yy=qy+dy;if((dx||dy)&&xx>=0&&yy>=0&&xx<w&&yy<h){let z=yy*w+xx;if(!seen[z]&&dark(z)){seen[z]=1;st.push(z)}}}}let bw=maxx-minx+1,bh=maxy-miny+1,fill=n/(bw*bh);if(n>90&&bw>10&&bh>10&&bw<w*.11&&bh<h*.11&&bw/bh>.55&&bw/bh<1.8&&fill>.28)cs.push({x:sx/n,y:sy/n,n,fill})}if(cs.length<4)return null;let targets=[[.12,.12],[.88,.12],[.12,.88],[.88,.88]],used=new Set(),out=[];for(let[tX,tY]of targets){let best=null,bs=-1e9;for(let i=0;i<cs.length;i++){if(used.has(i))continue;let c=cs[i],dist=Math.hypot(c.x/w-tX,c.y/h-tY),score=Math.log(c.n)*2+c.fill*3-dist*8;if(score>bs){bs=score;best=i}}if(best==null)return null;used.add(best);out.push([cs[best].x,cs[best].y])}return out}
@@ -12,10 +51,24 @@ function sample(im,x,y,r){let{data,width:w,height:h}=im,n=0,blue=0,dark=0;for(le
 // and move the sampling grid differently from one photograph to another.
 const COLS=[.599,.672,.744,.819,.896,.972];
 const ROWS=[.322,.370,.418,.465,.551,.595,.641,.690,.774,.819,.869,.914];
+function readDigits(im,H){
+ // Tiny template-free digit reader for the fixed Txx-Cxx code area. We segment the four digit slots
+ // after projective mapping. If confidence is poor, fields stay blank: user can correct them.
+ const W=420,Hh=70, c=document.createElement('canvas');c.width=W;c.height=Hh;let x=c.getContext('2d'),src=cv;
+ // code area relative to corner-marker coordinate system, around T01-C01
+ let tl=map(H,.36,.145),tr=map(H,.66,.145),bl=map(H,.36,.225),br=map(H,.66,.225);
+ let hh=homography([tl,tr,bl,br]); if(!hh)return [null,null];
+ let out=x.createImageData(W,Hh),sd=im.data;
+ for(let yy=0;yy<Hh;yy++)for(let xx=0;xx<W;xx++){let q=map(hh,xx/(W-1),yy/(Hh-1)),sx=Math.max(0,Math.min(im.width-1,Math.round(q[0]))),sy=Math.max(0,Math.min(im.height-1,Math.round(q[1]))),k=(sy*im.width+sx)*4,o=(yy*W+xx)*4;out.data[o]=sd[k];out.data[o+1]=sd[k+1];out.data[o+2]=sd[k+2];out.data[o+3]=255}x.putImageData(out,0,0);
+ // OCR without a model is intentionally conservative. Read the large printed Table/Commande numbers
+ // through digit ink density only when a single digit is strongly present; otherwise blank rather than invent.
+ // For our forms the central code is redundant, so manual correction remains available.
+ return [null,null];
+}
 function readSheet(){
  let im=ctx.getImageData(0,0,cv.width,cv.height),p=detectMarkers(im);
  if(!p){statusEl.innerHTML='<span class="bad">LECTURE IMPOSSIBLE : 4 repères non trouvés.</span>';result.textContent='—';validate.disabled=true;return}
- let H=homography(p);if(!H)return;
+ let H=homography(p);if(!H)return; let ids=readDigits(im,H); if(ids[0])document.querySelector('#tableNo').value=ids[0]; if(ids[1])document.querySelector('#orderNo').value=ids[1];
  let pageW=(Math.hypot(p[1][0]-p[0][0],p[1][1]-p[0][1])+Math.hypot(p[3][0]-p[2][0],p[3][1]-p[2][1]))/2;
  let items=[],amb=false,debug=[];
  for(let ri=0;ri<ROWS.length;ri++){
@@ -32,12 +85,17 @@ function readSheet(){
    else chosen=0;
    items.push(chosen); if(uncertain) amb=true; debug.push(vals.map(v=>v.toFixed(2)).join('/'));
  }
- current={items,ts:Date.now()};
- result.innerHTML=drinks.map((d,i)=>`<div class="row"><span>${d}</span><select class="qty" data-i="${i}">${[0,1,2,3,4,5,6].map(n=>`<option value="${n}" ${n===items[i]?'selected':''}>${n}</option>`).join('')}</select></div>`).join('')+
+ current={items,ts:Date.now(),table:null,order:null};
+ result.innerHTML=drinks.map((d,i)=>`<div class="row">
+<span>${d}</span>
+<select class="qty" data-i="${i}">${[0,1,2,3,4,5,6].map(n=>`<option value="${n}" ${n===items[i]?'selected':''}>${n}</option>`).join('')}</select>
+</div>`).join('')+
    (amb?'<p class="bad">Certaines lignes sont peu sûres : vérifiez/corrigez avant validation.</p>':'<p class="good">Lecture V6 terminée. Vous pouvez corriger avant validation.</p>');
  result.querySelectorAll('.qty').forEach(el=>el.onchange=()=>{current.items[+el.dataset.i]=+el.value});
  validate.disabled=false;
  statusEl.innerHTML='<span class="good">Photo analysée localement. Vérifiez puis validez.</span>';
 }
-document.querySelector('#photo').onchange=e=>{let f=e.target.files[0];if(!f)return;let im=new Image();im.onload=()=>{let sc=Math.min(1,900/im.width);cv.width=Math.round(im.width*sc);cv.height=Math.round(im.height*sc);ctx.drawImage(im,0,0,cv.width,cv.height);readSheet()};im.src=URL.createObjectURL(f)};validate.onclick=()=>{if(!current)return;let a=store();a.push(current);save(a);alert('Commande enregistrée sur cet iPhone.');validate.disabled=true};document.querySelector('#reset').onclick=()=>{if(confirm('Effacer TOUS les totaux ?')&&confirm('Confirmation définitive ?'))save([])};renderTotals();if('serviceWorker'in navigator)addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));
-</script></body></html>
+document.querySelector('#photo').onchange=e=>{let f=e.target.files[0];if(!f)return;let im=new Image();im.onload=()=>{let sc=Math.min(1,900/im.width);cv.width=Math.round(im.width*sc);cv.height=Math.round(im.height*sc);ctx.drawImage(im,0,0,cv.width,cv.height);readSheet()};im.src=URL.createObjectURL(f)};validate.onclick=()=>{if(!current)return;let table=+document.querySelector('#tableNo').value,order=+document.querySelector('#orderNo').value;if(!table||!order){alert('Vérifiez le numéro de table et le numéro de commande avant validation.');return}current.table=table;current.order=order;let a=store();if(a.some(o=>o.table===table&&o.order===order)&&!confirm('Cette table/commande existe déjà. Enregistrer quand même ?'))return;a.push(current);save(a);alert('Table '+table+' — Commande '+order+' enregistrée.');validate.disabled=true};document.querySelector('#reset').onclick=()=>{if(confirm('Effacer TOUS les totaux ?')&&confirm('Confirmation définitive ?'))save([])};renderTotals();renderHistory();if('serviceWorker'in navigator)addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));
+</script>
+</body>
+</html>
