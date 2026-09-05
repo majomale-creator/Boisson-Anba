@@ -8,13 +8,13 @@
 <meta name="apple-mobile-web-app-title" content="Boissons ANBA">
 <link rel="manifest" href="./manifest.webmanifest">
 <title>Boissons ANBA</title>
-<style>body{font-family:-apple-system,system-ui;margin:0;background:#f2f2f2;color:#111}header{background:linear-gradient(135deg,#6f4e24,#b08d57);color:#fff;padding:14px;text-align:center}main{max-width:760px;margin:auto;padding:12px}.card{background:#fff;border-radius:14px;padding:14px;margin:10px 0;box-shadow:0 1px 5px #bbb}.file,button{display:block;width:100%;box-sizing:border-box;padding:14px;margin:8px 0;border:0;border-radius:10px;background:#8a642f;color:#fff;font-size:17px;text-align:center}button:disabled{opacity:.35}.qty{width:64px;padding:8px;border:1px solid #b99a68;border-radius:8px;font-size:18px;text-align:center;background:#fff}.confidence{font-size:11px;color:#777;margin-left:6px}.danger{background:#9b1c1c}input[type=file]{display:none}canvas{width:100%;height:auto;border-radius:8px;background:#ddd}.row{display:grid;grid-template-columns:1fr auto;gap:8px;padding:7px 0;border-bottom:1px solid #ddd}.good{color:#08752f;font-weight:700}.bad{color:#a01818;font-weight:700}.small{font-size:13px;color:#666}.idgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.idgrid label{font-weight:700}.idgrid input{width:100%;box-sizing:border-box;margin-top:5px;padding:10px;border:1px solid #b99a68;border-radius:8px;font-size:20px;background:#fff}.hist{padding:9px 0;border-bottom:1px solid #ddd}.hist button{display:inline-block;width:auto;padding:7px 10px;margin:5px 0 0;font-size:13px;background:#9b1c1c}</style>
+<style>body{font-family:-apple-system,system-ui;margin:0;background:#f2f2f2;color:#111}header{background:linear-gradient(135deg,#6f4e24,#b08d57);color:#fff;padding:14px;text-align:center}main{max-width:760px;margin:auto;padding:12px}.card{background:#fff;border-radius:14px;padding:14px;margin:10px 0;box-shadow:0 1px 5px #bbb}.file,button{display:block;width:100%;box-sizing:border-box;padding:14px;margin:8px 0;border:0;border-radius:10px;background:#8a642f;color:#fff;font-size:17px;text-align:center}button:disabled{opacity:.35}.qty{width:64px;padding:8px;border:1px solid #b99a68;border-radius:8px;font-size:18px;text-align:center;background:#fff}.confidence{font-size:11px;color:#777;margin-left:6px}.danger{background:#9b1c1c}input[type=file]{display:none}canvas{width:100%;height:auto;border-radius:8px;background:#ddd}.row{display:grid;grid-template-columns:1fr auto;gap:8px;padding:7px 0;border-bottom:1px solid #ddd}.good{color:#08752f;font-weight:700}.bad{color:#a01818;font-weight:700}.small{font-size:13px;color:#666}.idgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.idgrid label{font-weight:700}.idgrid input{width:100%;box-sizing:border-box;margin-top:5px;padding:10px;border:1px solid #b99a68;border-radius:8px;font-size:20px;background:#fff}.tothead,.totrow{display:grid;grid-template-columns:1fr 72px 88px;gap:8px;align-items:center;padding:7px 0;border-bottom:1px solid #ddd}.tothead{font-size:12px;color:#6f4e24;font-weight:700}.totrow span:nth-child(2),.totrow span:nth-child(3){text-align:right}.hist{padding:9px 0;border-bottom:1px solid #ddd}.hist button{display:inline-block;width:auto;padding:7px 10px;margin:5px 0 0;font-size:13px;background:#9b1c1c}</style>
 </head>
 <body>
 <header>
 <b>Boissons ANBA</b>
 <br>
-<small>Lecteur local V7 — table, commande, historique</small>
+<small>Lecteur local V8 — lecture complète</small>
 </header>
 <main>
 <div class="card">
@@ -31,7 +31,7 @@
 <button id="validate" disabled>Valider la commande</button>
 </div>
 <div class="card">
-<h3>Totaux</h3>
+<h3>Totaux & équivalents bouteilles</h3>
 <div id="totals">
 </div>
 <button class="danger" id="reset">Tout annuler</button>
@@ -40,7 +40,11 @@
 <script>
 const drinks=['Whisky Antiquity Blue','Whisky Royal Challenge','Brandy Morpheus','Bière','Martini','Punch','Porto','Bacardi Breezer','Eau','Coca-Cola','Jus de fruits','Soda'];
 const cv=document.querySelector('#cv'),ctx=cv.getContext('2d',{willReadFrequently:true}),statusEl=document.querySelector('#status'),result=document.querySelector('#result'),validate=document.querySelector('#validate');let current=null;
-function store(){return JSON.parse(localStorage.getItem('anbaOrders')||'[]')}function save(a){localStorage.setItem('anbaOrders',JSON.stringify(a));renderTotals();renderHistory()}function renderTotals(){let t=Array(12).fill(0);store().forEach(o=>o.items.forEach((v,i)=>t[i]+=v));document.querySelector('#totals').innerHTML=drinks.map((d,i)=>`<div class="row"><span>${d}</span><b>${t[i]}</b></div>`).join('')}function renderHistory(){let a=store(),h=document.querySelector('#history');if(!a.length){h.textContent='Aucune commande enregistrée.';return}h.innerHTML=a.slice().reverse().map((o,j)=>{let i=a.length-1-j, nz=o.items.map((v,k)=>v?drinks[k]+' '+v:'').filter(Boolean).join(' · ')||'Aucune boisson';return `<div class="hist"><b>Table ${o.table||'?'} — Commande ${o.order||'?'}</b><br><span class="small">${nz}</span><br><button data-del="${i}">Annuler cette commande</button></div>`}).join('');h.querySelectorAll('[data-del]').forEach(b=>b.onclick=()=>{if(confirm('Annuler cette commande ?')){let x=store();x.splice(+b.dataset.del,1);save(x)}})}
+function store(){return JSON.parse(localStorage.getItem('anbaOrders')||'[]')}function save(a){localStorage.setItem('anbaOrders',JSON.stringify(a));renderTotals();renderHistory()}
+// ml per served unit and bottle/container size. null = no meaningful bottle equivalent displayed.
+// Whisky/brandy: large peg 60 ml, 750 ml bottle. Martini/Porto: 60 ml, 750 ml. Beer/Breezer: one served unit = one bottle.
+const PACK=[ [60,750],[60,750],[60,750],[1,1],[60,750],null,[60,750],[1,1],null,null,null,null ];
+function renderTotals(){let t=Array(12).fill(0);store().forEach(o=>o.items.forEach((v,i)=>t[i]+=v));let h='<div class="tothead"><span>Boisson</span><span>Total</span><span>Bouteilles</span></div>';h+=drinks.map((d,i)=>{let eq='—';if(PACK[i]){eq=(t[i]*PACK[i][0]/PACK[i][1]).toFixed(1)}return `<div class="totrow"><span>${d}</span><span><b>${t[i]}</b></span><span><b>${eq}</b></span></div>`}).join('');document.querySelector('#totals').innerHTML=h}function renderHistory(){let a=store(),h=document.querySelector('#history');if(!a.length){h.textContent='Aucune commande enregistrée.';return}h.innerHTML=a.slice().reverse().map((o,j)=>{let i=a.length-1-j, nz=o.items.map((v,k)=>v?drinks[k]+' '+v:'').filter(Boolean).join(' · ')||'Aucune boisson';return `<div class="hist"><b>Table ${o.table||'?'} — Commande ${o.order||'?'}</b><br><span class="small">${nz}</span><br><button data-del="${i}">Annuler cette commande</button></div>`}).join('');h.querySelectorAll('[data-del]').forEach(b=>b.onclick=()=>{if(confirm('Annuler cette commande ?')){let x=store();x.splice(+b.dataset.del,1);save(x)}})}
 function solve(A,b){for(let i=0;i<8;i++){let m=i;for(let j=i+1;j<8;j++)if(Math.abs(A[j][i])>Math.abs(A[m][i]))m=j;[A[i],A[m]]=[A[m],A[i]];[b[i],b[m]]=[b[m],b[i]];let q=A[i][i];if(Math.abs(q)<1e-9)return null;for(let k=i;k<8;k++)A[i][k]/=q;b[i]/=q;for(let j=0;j<8;j++)if(j!==i){q=A[j][i];for(let k=i;k<8;k++)A[j][k]-=q*A[i][k];b[j]-=q*b[i]}}return b}
 function homography(p){let s=[[0,0],[1,0],[0,1],[1,1]],A=[],b=[];for(let i=0;i<4;i++){let[u,v]=s[i],[x,y]=p[i];A.push([u,v,1,0,0,0,-u*x,-v*x]);b.push(x);A.push([0,0,0,u,v,1,-u*y,-v*y]);b.push(y)}return solve(A,b)}function map(H,u,v){let z=H[6]*u+H[7]*v+1;return[(H[0]*u+H[1]*v+H[2])/z,(H[3]*u+H[4]*v+H[5])/z]}
 function detectMarkers(im){let{data,width:w,height:h}=im,seen=new Uint8Array(w*h),cs=[];const dark=i=>{let k=i*4,r=data[k],g=data[k+1],b=data[k+2];return(r+g+b)/3<115||(b>r*1.12&&b>g*1.04&&r<175)};for(let y=0;y<h;y++)for(let x=0;x<w;x++){let ii=y*w+x;if(seen[ii]||!dark(ii))continue;let st=[ii];seen[ii]=1;let n=0,minx=x,maxx=x,miny=y,maxy=y,sx=0,sy=0;while(st.length){let q=st.pop(),qy=(q/w)|0,qx=q-qy*w;n++;sx+=qx;sy+=qy;minx=Math.min(minx,qx);maxx=Math.max(maxx,qx);miny=Math.min(miny,qy);maxy=Math.max(maxy,qy);for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++){let xx=qx+dx,yy=qy+dy;if((dx||dy)&&xx>=0&&yy>=0&&xx<w&&yy<h){let z=yy*w+xx;if(!seen[z]&&dark(z)){seen[z]=1;st.push(z)}}}}let bw=maxx-minx+1,bh=maxy-miny+1,fill=n/(bw*bh);if(n>90&&bw>10&&bh>10&&bw<w*.11&&bh<h*.11&&bw/bh>.55&&bw/bh<1.8&&fill>.28)cs.push({x:sx/n,y:sy/n,n,fill})}if(cs.length<4)return null;let targets=[[.12,.12],[.88,.12],[.12,.88],[.88,.88]],used=new Set(),out=[];for(let[tX,tY]of targets){let best=null,bs=-1e9;for(let i=0;i<cs.length;i++){if(used.has(i))continue;let c=cs[i],dist=Math.hypot(c.x/w-tX,c.y/h-tY),score=Math.log(c.n)*2+c.fill*3-dist*8;if(score>bs){bs=score;best=i}}if(best==null)return null;used.add(best);out.push([cs[best].x,cs[best].y])}return out}
@@ -52,18 +56,34 @@ function sample(im,x,y,r){let{data,width:w,height:h}=im,n=0,blue=0,dark=0;for(le
 const COLS=[.599,.672,.744,.819,.896,.972];
 const ROWS=[.322,.370,.418,.465,.551,.595,.641,.690,.774,.819,.869,.914];
 function readDigits(im,H){
- // Tiny template-free digit reader for the fixed Txx-Cxx code area. We segment the four digit slots
- // after projective mapping. If confidence is poor, fields stay blank: user can correct them.
- const W=420,Hh=70, c=document.createElement('canvas');c.width=W;c.height=Hh;let x=c.getContext('2d'),src=cv;
- // code area relative to corner-marker coordinate system, around T01-C01
- let tl=map(H,.36,.145),tr=map(H,.66,.145),bl=map(H,.36,.225),br=map(H,.66,.225);
- let hh=homography([tl,tr,bl,br]); if(!hh)return [null,null];
- let out=x.createImageData(W,Hh),sd=im.data;
- for(let yy=0;yy<Hh;yy++)for(let xx=0;xx<W;xx++){let q=map(hh,xx/(W-1),yy/(Hh-1)),sx=Math.max(0,Math.min(im.width-1,Math.round(q[0]))),sy=Math.max(0,Math.min(im.height-1,Math.round(q[1]))),k=(sy*im.width+sx)*4,o=(yy*W+xx)*4;out.data[o]=sd[k];out.data[o+1]=sd[k+1];out.data[o+2]=sd[k+2];out.data[o+3]=255}x.putImageData(out,0,0);
- // OCR without a model is intentionally conservative. Read the large printed Table/Commande numbers
- // through digit ink density only when a single digit is strongly present; otherwise blank rather than invent.
- // For our forms the central code is redundant, so manual correction remains available.
- return [null,null];
+ // Read the printed central code Txx-Cxx. No network/OCR service: fixed-layout local digit recognition.
+ // The code is redundant with the large Table/Commande fields and is the most stable target geometrically.
+ const W=520, HH=120, c=document.createElement('canvas'); c.width=W;c.height=HH; let x=c.getContext('2d',{willReadFrequently:true});
+ // Crop the complete central code, expressed in the marker coordinate system.
+ let tl=map(H,.285,.105),tr=map(H,.715,.105),bl=map(H,.285,.255),br=map(H,.715,.255);
+ let Q=homography([tl,tr,bl,br]); if(!Q)return [null,null]; let out=x.createImageData(W,HH),sd=im.data;
+ for(let yy=0;yy<HH;yy++)for(let xx=0;xx<W;xx++){let q=map(Q,xx/(W-1),yy/(HH-1)),sx=Math.max(0,Math.min(im.width-1,Math.round(q[0]))),sy=Math.max(0,Math.min(im.height-1,Math.round(q[1]))),k=(sy*im.width+sx)*4,o=(yy*W+xx)*4;out.data[o]=sd[k];out.data[o+1]=sd[k+1];out.data[o+2]=sd[k+2];out.data[o+3]=255} x.putImageData(out,0,0);
+ // Convert to dark-ink mask and find connected components in the middle text band.
+ let D=x.getImageData(0,0,W,HH).data, mask=new Uint8Array(W*HH);
+ for(let yy=12;yy<HH-10;yy++)for(let xx=5;xx<W-5;xx++){let k=(yy*W+xx)*4,L=(D[k]+D[k+1]+D[k+2])/3;if(L<145)mask[yy*W+xx]=1}
+ let seen=new Uint8Array(W*HH), comps=[];
+ for(let yy=10;yy<HH-8;yy++)for(let xx=4;xx<W-4;xx++){let ii=yy*W+xx;if(!mask[ii]||seen[ii])continue;let st=[ii];seen[ii]=1,n=0,minx=xx,maxx=xx,miny=yy,maxy=yy;while(st.length){let z=st.pop(),zy=(z/W)|0,zx=z-zy*W;n++;minx=Math.min(minx,zx);maxx=Math.max(maxx,zx);miny=Math.min(miny,zy);maxy=Math.max(maxy,zy);for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++){let X=zx+dx,Y=zy+dy;if(X>=0&&Y>=0&&X<W&&Y<HH){let a=Y*W+X;if(mask[a]&&!seen[a]){seen[a]=1;st.push(a)}}}}let bw=maxx-minx+1,bh=maxy-miny+1;if(n>20&&bh>18&&bh<100&&bw>3&&bw<80)comps.push({minx,maxx,miny,maxy,bw,bh,n})}
+ comps.sort((a,b)=>a.minx-b.minx);
+ // Keep glyph-sized components around the central horizontal line; merge dot-like fragments into neighbours is unnecessary for digits.
+ let glyphs=comps.filter(g=>g.miny<HH*.78&&g.maxy>HH*.22&&g.bh>HH*.25);
+ // Render templates 0..9 and compare normalized 24x36 binary silhouettes.
+ function norm(comp){let Nw=24,Nh=36,a=new Uint8Array(Nw*Nh);for(let j=0;j<Nh;j++)for(let i=0;i<Nw;i++){let sx=Math.round(comp.minx+(i+.5)*comp.bw/Nw-.5),sy=Math.round(comp.miny+(j+.5)*comp.bh/Nh-.5);if(sx>=0&&sy>=0&&sx<W&&sy<HH)a[j*Nw+i]=mask[sy*W+sx]}return a}
+ let tc=document.createElement('canvas');tc.width=60;tc.height=80;let tx=tc.getContext('2d',{willReadFrequently:true});let templates=[];
+ for(let d=0;d<10;d++){tx.clearRect(0,0,60,80);tx.fillStyle='#fff';tx.fillRect(0,0,60,80);tx.fillStyle='#000';tx.font='bold 58px Arial,Helvetica,sans-serif';tx.textAlign='center';tx.textBaseline='middle';tx.fillText(String(d),30,42);let td=tx.getImageData(0,0,60,80).data,tm=new Uint8Array(60*80);let minx=59,maxx=0,miny=79,maxy=0;for(let Y=0;Y<80;Y++)for(let X=0;X<60;X++){if(td[(Y*60+X)*4]<145){tm[Y*60+X]=1;minx=Math.min(minx,X);maxx=Math.max(maxx,X);miny=Math.min(miny,Y);maxy=Math.max(maxy,Y)}}let a=new Uint8Array(24*36),bw=maxx-minx+1,bh=maxy-miny+1;for(let j=0;j<36;j++)for(let i=0;i<24;i++){let X=Math.round(minx+(i+.5)*bw/24-.5),Y=Math.round(miny+(j+.5)*bh/36-.5);a[j*24+i]=tm[Y*60+X]}templates.push(a)}
+ function classify(g){let a=norm(g),best=-1,bs=1e9,second=1e9;for(let d=0;d<10;d++){let diff=0;for(let i=0;i<a.length;i++)if(a[i]!==templates[d][i])diff++;let sc=diff/a.length;if(sc<bs){second=bs;bs=sc;best=d}else if(sc<second)second=sc}return {d:best,score:bs,gap:second-bs,x:(g.minx+g.maxx)/2}}
+ let cs=glyphs.map(classify);
+ // The printed code layout is T 0 1 - C 0 1. Use horizontal position to select the two digit pairs.
+ // Relative x windows are intentionally broad to tolerate perspective/crop variation.
+ let left=cs.filter(z=>z.x>W*.18&&z.x<W*.48).sort((a,b)=>a.x-b.x);
+ let right=cs.filter(z=>z.x>W*.52&&z.x<W*.84).sort((a,b)=>a.x-b.x);
+ function pair(arr){if(arr.length<2)return null; // choose the two rightmost digit-like glyphs in each half (after T/C)
+   let q=arr.slice(-2); if(q.some(z=>z.score>.48))return null; return q[0].d*10+q[1].d;}
+ return [pair(left),pair(right)];
 }
 function readSheet(){
  let im=ctx.getImageData(0,0,cv.width,cv.height),p=detectMarkers(im);
@@ -90,7 +110,7 @@ function readSheet(){
 <span>${d}</span>
 <select class="qty" data-i="${i}">${[0,1,2,3,4,5,6].map(n=>`<option value="${n}" ${n===items[i]?'selected':''}>${n}</option>`).join('')}</select>
 </div>`).join('')+
-   (amb?'<p class="bad">Certaines lignes sont peu sûres : vérifiez/corrigez avant validation.</p>':'<p class="good">Lecture V6 terminée. Vous pouvez corriger avant validation.</p>');
+   (amb?'<p class="bad">Certaines lignes sont peu sûres : vérifiez/corrigez avant validation.</p>':'<p class="good">Lecture V8 terminée. Vous pouvez corriger avant validation.</p>');
  result.querySelectorAll('.qty').forEach(el=>el.onchange=()=>{current.items[+el.dataset.i]=+el.value});
  validate.disabled=false;
  statusEl.innerHTML='<span class="good">Photo analysée localement. Vérifiez puis validez.</span>';
