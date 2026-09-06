@@ -1,0 +1,13 @@
+BOISSONS ANBA — INSTALLATION SUR UN AUTRE IPHONE
+
+1. Mettre le contenu de ce dossier à la racine du dépôt GitHub Boisson-Anba.
+2. GitHub > Settings > Pages > Source : GitHub Actions.
+3. Attendre la fin de l'action "Deploy GitHub Pages".
+4. Sur le nouvel iPhone, avec Internet, ouvrir l'adresse GitHub Pages du dépôt.
+5. Attendre que l'application indique que le mode hors connexion est prêt.
+6. Safari > Partager > Sur l'écran d'accueil > Ajouter.
+7. Fermer Safari, activer le mode avion et lancer l'icône Boissons ANBA.
+8. Faire une photo-test AVANT le jour de la soirée.
+
+Le lecteur de fiches et les règles de calcul de l'application source n'ont pas été modifiés.
+Les données restent locales à chaque iPhone (IndexedDB) : elles ne se synchronisent pas entre téléphones.
