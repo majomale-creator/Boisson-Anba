@@ -30,8 +30,9 @@ jobs:
       - name: Extract ANBA PWA
         shell: bash
         run: |
+  
           mkdir -p site
-          unzip -q Boissons_ANBA_GitHub_Pages_TABLE_COMMANDE_V2.zip -d site
+          unzip -q Boissons_ANBA_GitHub_Pages_FINAL_CORRIGE.zip -d site
           test -f site/index.html
           test -f site/sw.js
           test -f site/manifest.webmanifest
